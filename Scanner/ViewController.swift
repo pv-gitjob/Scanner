@@ -12,9 +12,11 @@ import Alamofire
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     @IBOutlet weak var textField: UITextView!
+    var keyboard = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        textField.becomeFirstResponder()
     }
 
     @IBAction func clearBtn(_ sender: Any) {
@@ -62,15 +64,36 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     @IBAction func keyboardBtn(_ sender: Any) {
-        //self.textField.becomeFirstResponder()
+        if (keyboard) {
+            textField.resignFirstResponder()
+            keyboard = false
+        } else {
+            textField.becomeFirstResponder()
+            keyboard = true
+        }
     }
     
     @IBAction func copyBtn(_ sender: Any) {
-        
+        UIPasteboard.general.string = self.textField.text
+    }
+    
+    @IBAction func pasteBtn(_ sender: Any) {
+        self.textField.text += UIPasteboard.general.string ?? ""
     }
     
     @IBAction func saveBtn(_ sender: Any) {
-        
+        let text = self.textField.text
+        let filename = getDocumentsDirectory().appendingPathComponent("output.txt")
+        do {
+            try text?.write(to: filename, atomically: true, encoding: String.Encoding.utf8)
+        } catch {
+            print("Unable to save file")
+        }
+    }
+
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
     }
 
 }
